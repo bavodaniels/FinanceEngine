@@ -3,3 +3,8 @@
  */
 
 rootProject.name = 'FinanceEngine'
+include 'core'
+include 'adapters'
+include 'core:ports'
+findProject(':core:ports')?.name = 'ports'
+
