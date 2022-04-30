@@ -1,0 +1,16 @@
+spring:
+  jpa:
+    database: postgresql
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 30
+    show-sql: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/stocks
+    username: postgres
+    password: ${DB_POSTGRES_PASSWORD}
+
+
