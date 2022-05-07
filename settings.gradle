@@ -3,8 +3,7 @@
  */
 
 rootProject.name = 'FinanceEngine'
-include 'core'
+include ':core:core'
 include 'adapters'
-include 'core:ports'
-findProject(':core:ports')?.name = 'ports'
+include ':core:ports'
 
