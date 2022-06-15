@@ -5,5 +5,6 @@
 rootProject.name = 'FinanceEngine'
 include ':core:core'
 include 'adapters'
-include ':core:ports'
+include ':core:ports:ticker'
+include 'core:ports:wallet'
 

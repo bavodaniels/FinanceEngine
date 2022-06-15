@@ -1,12 +1,12 @@
 package be.bavodaniels.core.ta;
 
-import be.bavodaniels.core.ta.exception.NotEnoughDataException;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class BreakoutTest {
@@ -30,7 +30,7 @@ class BreakoutTest {
 
     @Test
     void testNotEnoughDataThrowsException() {
-        assertThrows(NotEnoughDataException.class, () -> breakout.calculate(
-                List.of(1.0), 5));
+       assertThat(breakout.calculate(
+                List.of(1.0), 5)).isEmpty();
     }
 }

@@ -21,7 +21,7 @@ target/
 
 ### Gralde stuff
 .gradle
-
+.java-version
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/

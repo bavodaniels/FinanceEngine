@@ -1,6 +1,7 @@
 package be.bavodaniels.core.ta;
 
-import be.bavodaniels.core.ta.exception.NotEnoughDataException;
+
+import be.bavodaniels.core.statistics.Average;
 
 import java.awt.geom.Arc2D;
 import java.sql.PreparedStatement;
@@ -11,18 +12,9 @@ import java.util.stream.DoubleStream;
 
 public class MovingAverage {
 
-    /**
-     * @param data List with ticker data order by newest data first
-     * @param period the amount of days to calculate the moving average for
-     * @return the moving average
-     */
-    public Optional<Double> calculate(List<Double> data, int period){
-        if (period > data.size())
-            throw new NotEnoughDataException();
+    public static final Average average = new Average();
 
-        List<Double> neededData = data.subList(0, period);
-
-        return neededData.stream().reduce(Double::sum)
-                .map(sum -> sum / period);
+    public Optional<Double> calculate(List<Double> data) {
+        return average.calculate(data);
     }
 }

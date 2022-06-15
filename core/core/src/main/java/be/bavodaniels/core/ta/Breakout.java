@@ -1,11 +1,14 @@
 package be.bavodaniels.core.ta;
 
-import be.bavodaniels.core.ta.exception.NotEnoughDataException;
+import be.bavodaniels.core.statistics.Max;
+import be.bavodaniels.core.statistics.Min;
 
 import java.util.List;
 import java.util.Optional;
 
 public class Breakout {
+    private static final Min minStat = new Min();
+    private static final Max maxStat = new Max();
 
     /**
      * @param data List with ticker data order by newest data first
@@ -14,15 +17,13 @@ public class Breakout {
      */
     public Optional<Result> calculate(List<Double> data, int period){
         if (period > data.size())
-            throw new NotEnoughDataException();
+            return Optional.empty();
 
         List<Double> neededData = data.subList(0, period);
 
-        Optional<Double> min = neededData.stream()
-                .min(Double::compareTo);
+        Optional<Double> min = minStat.calculate(neededData);
 
-        Optional<Double> max = neededData.stream()
-                .max(Double::compareTo);
+        Optional<Double> max = maxStat.calculate(neededData);
 
         return min.map(aDouble -> new Result(aDouble, max.get()));
     }

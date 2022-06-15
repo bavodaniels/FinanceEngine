@@ -2,8 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'be.bavodaniels'
-version 'unspecified'
+group 'be.bavodaniels.wallet'
 
 repositories {
     mavenCentral()
