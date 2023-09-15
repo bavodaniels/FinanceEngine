@@ -30,7 +30,7 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }else{
+        } else {
             return cache.get(symbol);
         }
     }
@@ -47,7 +47,7 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }else{
+        } else {
             return underlyingCache.get(symbol);
         }
     }
