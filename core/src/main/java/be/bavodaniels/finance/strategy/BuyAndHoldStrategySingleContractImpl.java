@@ -7,15 +7,12 @@ import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import tech.tablesaw.api.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Scanner;
 import java.util.function.Predicate;
 
 
@@ -132,19 +129,6 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
         Percentile p = new Percentile().withEstimationType(Percentile.EstimationType.R_6)
                 .withNaNStrategy(NaNStrategy.REMOVED);
         p.setData(deMeaned.asDoubleArray());
-        double[] data = new double[10447];
-        try {
-            Scanner scanner = new Scanner(new File("/Users/bavodaniels/Projects/personal/FinanceEngine/core/src/main/java/be/bavodaniels/finance/data.csv"));
-            int i = 0;
-            while(scanner.hasNext()){
-                data[i++] = Double.valueOf(scanner.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-
-
 
         accounting.where(dateColumn.eval((Predicate<LocalDate>) localDate -> localDate.getDayOfWeek().ordinal() < 5))
                 .write().csv(this.getClass().getSimpleName() + "-" + asset + ".csv");

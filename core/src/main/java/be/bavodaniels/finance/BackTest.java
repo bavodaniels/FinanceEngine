@@ -1,7 +1,7 @@
 package be.bavodaniels.finance;
 
 import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
-import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImpl;
+import be.bavodaniels.finance.strategy.BuyAndHoldStrategySingleContractImpl;
 import be.bavodaniels.finance.strategy.Statistics;
 import be.bavodaniels.finance.strategy.Strategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class BackTest {
 
     @Autowired
     public BackTest(CsvPriceRepositoryImpl priceRepository) {
-        this.strategy = new BuyAndHoldVariablePositionImpl(priceRepository, "sp500", 5, 100000, 0.2);
+        this.strategy = new BuyAndHoldStrategySingleContractImpl(priceRepository, "sp500", 5);
 
         LocalDate startDate = LocalDate.parse("1982-11-14");
         LocalDate endDate = LocalDate.parse("2022-09-30");
