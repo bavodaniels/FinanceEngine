@@ -1,7 +1,7 @@
 package be.bavodaniels.finance;
 
 import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
-import be.bavodaniels.finance.strategy.BuyAndHoldStrategySingleContractImpl;
+import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImplNLookBackStdDev;
 import be.bavodaniels.finance.strategy.Statistics;
 import be.bavodaniels.finance.strategy.Strategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +11,18 @@ import java.time.LocalDate;
 import java.util.logging.Logger;
 
 @Component
-public class BackTest {
+public class BackTestStrategy2_NLookBack {
     private final Logger logger = Logger.getLogger("BackTest");
     public Strategy strategy;
 
     @Autowired
-    public BackTest(CsvPriceRepositoryImpl priceRepository) {
-        this.strategy = new BuyAndHoldStrategySingleContractImpl(priceRepository, "sp500", 5);
+    public BackTestStrategy2_NLookBack(CsvPriceRepositoryImpl priceRepository) {
+        this.strategy = new BuyAndHoldVariablePositionImplNLookBackStdDev(priceRepository,
+                "sp500",
+                5,
+                100000,
+                0.2,
+                20);
 
         LocalDate startDate = LocalDate.parse("1982-11-14");
         LocalDate endDate = LocalDate.parse("2022-09-30");

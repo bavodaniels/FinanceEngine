@@ -61,4 +61,21 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
     public Double getUnderlyingPrice(String symbol, LocalDate date) {
         return getUnderlyingPrices(symbol).get(date);
     }
+
+    @Override
+    public List<Double> getPricesUpUntilDate(String asset, LocalDate date) {
+        Map<LocalDate, Double> prices = getPrices(asset);
+        List<LocalDate> keys = prices.keySet().stream().filter(d -> d.isBefore(date) || d.isEqual(date)).toList();
+
+        return keys.stream().map(prices::get).toList();
+    }
+
+    @Override
+    public List<Double> getPricesFromDataUpUntilDate(String asset, LocalDate from, LocalDate to) {
+        Map<LocalDate, Double> prices = getPrices(asset);
+        List<LocalDate> keys = prices.keySet().stream().filter(d -> d.isBefore(to) || d.isEqual(to))
+                .filter(d -> d.isAfter(from) || d.isEqual(from)).toList();
+
+        return keys.stream().map(prices::get).toList();
+    }
 }

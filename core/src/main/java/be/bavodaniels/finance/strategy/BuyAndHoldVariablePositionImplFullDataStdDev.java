@@ -3,6 +3,8 @@ package be.bavodaniels.finance.strategy;
 import be.bavodaniels.finance.model.Transaction;
 import be.bavodaniels.finance.model.TransactionType;
 import be.bavodaniels.finance.repository.PriceRepository;
+import be.bavodaniels.finance.standarddeviation.FullDataSetStandardDeviation;
+import be.bavodaniels.finance.standarddeviation.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import tech.tablesaw.api.*;
@@ -12,17 +14,18 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
-//Strategy 1
-public class BuyAndHoldStrategySingleContractImpl implements Strategy {
+
+public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
     private final PriceRepository priceRepository;
     private final String asset;
-    private final Integer contractsToHold = 1;
-    private int contractsHeld = 0;
+    private final Integer minimalContractsToHold = 4;
     private final int multiplier;
     private final List<Transaction> transactions = new ArrayList<>();
+    private final double allocatedCapital;
+    private final double targetRisk;
+    private final StandardDeviation stddev;
     private Table accounting = Table.create("accounting",
             DateColumn.create("date"),
             DoubleColumn.create("backAdjustedPrice"),
@@ -30,18 +33,39 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
             IntColumn.create("contractsHeld")
     );
 
-    public BuyAndHoldStrategySingleContractImpl(PriceRepository priceRepository, String asset, int multiplier) {
+    public BuyAndHoldVariablePositionImplFullDataStdDev(PriceRepository priceRepository,
+                                                        String asset,
+                                                        int multiplier,
+                                                        double allocatedCapital,
+                                                        double targetRisk) {
         this.priceRepository = priceRepository;
         this.asset = asset;
         this.multiplier = multiplier;
+        this.allocatedCapital = allocatedCapital;
+        this.targetRisk = targetRisk;
+
+        this.stddev = new FullDataSetStandardDeviation(priceRepository, asset);
+    }
+
+    protected BuyAndHoldVariablePositionImplFullDataStdDev(PriceRepository priceRepository,
+                                                        String asset,
+                                                        int multiplier,
+                                                        double allocatedCapital,
+                                                        double targetRisk,
+                                                           StandardDeviation stddev) {
+        this.priceRepository = priceRepository;
+        this.asset = asset;
+        this.multiplier = multiplier;
+        this.allocatedCapital = allocatedCapital;
+        this.targetRisk = targetRisk;
+
+        this.stddev = stddev;
     }
 
     @Override
     public void run(LocalDate date) {
         Row row = accounting.appendRow();
-
         row.setDate(accounting.columnIndex("date"), date);
-
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
 
@@ -50,13 +74,31 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
             underlyingPrice = getPreviousWorkingDayUnderlyingPrice(date);
         }
 
-        if (contractsHeld == 0) {
-            transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
-            contractsHeld++;
-        }
         row.setDouble(accounting.columnIndex("backAdjustedPrice"), price);
         row.setDouble(accounting.columnIndex("actualPrice"), underlyingPrice);
-        row.setInt(accounting.columnIndex("contractsHeld"), contractsHeld);
+
+        if (minimalCapitalRequirementIsMet(date)) {
+            int contractsToHold = calculateContractsToHold(underlyingPrice, date);
+            transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
+            row.setInt(accounting.columnIndex("contractsHeld"), contractsToHold);
+        }
+    }
+
+    private int calculateContractsToHold(Double underlyingPrice, LocalDate date) {
+        double contractsFractional = (allocatedCapital * targetRisk) / (multiplier * underlyingPrice * stddev.calculate(date));
+        return Double.valueOf(contractsFractional).intValue();
+    }
+
+    private int getAmountOfOpenContracts() {
+        int contractsHeld = transactions.stream()
+                .map(transaction -> transaction.type() == TransactionType.BUY ? transaction.amount() : transaction.amount() * -1)
+                .reduce(Integer::sum)
+                .orElse(0);
+        return contractsHeld;
+    }
+
+    private boolean minimalCapitalRequirementIsMet(LocalDate date) {
+        return allocatedCapital > ((multiplier * getPreviousWorkingDayPrice(date) * 1.0 * stddev.calculate(date)) / targetRisk);
     }
 
     private Double getPreviousWorkingDayPrice(LocalDate date) {
@@ -81,14 +123,10 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
 
     @Override
     public void sellAll(LocalDate date) {
-        Optional<Transaction> lastTransaction = transactions.stream()
-                .filter(t -> t.type() == TransactionType.BUY)
-                .sorted()
-                .max(Transaction::compareTo);
-
-        if (lastTransaction.isPresent()) {
+        int amountOfOpenContracts = getAmountOfOpenContracts();
+        if (amountOfOpenContracts > 0) {
             Double price = priceRepository.getPrice(asset, date);
-            transactions.add(new Transaction(date, price, contractsToHold, TransactionType.SELL));
+            transactions.add(new Transaction(date, price, amountOfOpenContracts, TransactionType.SELL));
         }
     }
 
@@ -101,16 +139,14 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
         DoubleColumn actualPrice = accounting.doubleColumn("actualPrice");
 
         DoubleColumn returnPricePoints = DoubleColumn.create("returnPricePoints")
-                .append(backAdjustedPrice
-                        .subtract(backAdjustedPrice.lag(1)
-                                .multiply(contractsHeld)));
+                .append(DoubleColumn.create("priceChange")
+                        .append(backAdjustedPrice)
+                        .subtract(backAdjustedPrice.lag(1))
+                        .multiply(contractsHeld.lag(1)));
         DoubleColumn returnBaseCurrency = DoubleColumn.create("returnBaseCurrency")
                 .append(returnPricePoints.multiply(multiplier));
-        DoubleColumn capitalRequired = DoubleColumn.create("capitalRequired")
-                .append(actualPrice.multiply(multiplier));
         DoubleColumn returns = DoubleColumn.create("returnPercentage")
-                .append(returnBaseCurrency.
-                        divide(capitalRequired.lag(1)));
+                .append(returnBaseCurrency.divide(allocatedCapital));
         DoubleColumn cumsum = DoubleColumn.create("CumulativeSum")
                 .append((returns)
                         .cumSum());
@@ -125,7 +161,7 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
         DoubleColumn drawdown = DoubleColumn.create("DrawDown").append(maxCumsum.subtract(cumsum));
         DoubleColumn deMeaned = DoubleColumn.create("deMeaned").append(returns.subtract(mean));
 
-        accounting.addColumns(returnPricePoints, returnBaseCurrency, capitalRequired, returns, cumsum, maxCumsum, drawdown, deMeaned);
+        accounting.addColumns(returnPricePoints, returnBaseCurrency, returns, cumsum, maxCumsum, drawdown, deMeaned);
         Percentile p = new Percentile().withEstimationType(Percentile.EstimationType.R_6)
                 .withNaNStrategy(NaNStrategy.REMOVED);
         p.setData(deMeaned.asDoubleArray());
