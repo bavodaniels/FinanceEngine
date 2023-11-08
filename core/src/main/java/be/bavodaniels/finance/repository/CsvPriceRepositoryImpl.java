@@ -78,4 +78,14 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
 
         return keys.stream().map(prices::get).toList();
     }
+
+    public List<TimeSeriesEntry> findAll(String asset) {
+        try (Reader reader = new FileReader(new ClassPathResource("sp500.csv").getFile())) {
+            List<TimeSeriesEntry> records = new CsvToBeanBuilder<TimeSeriesEntry>(reader)
+                    .withType(TimeSeriesEntry.class).build().parse();
+            return records;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

@@ -9,7 +9,7 @@ spring:
           batch_size: 30
     show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/stocks
+    url: jdbc:postgresql://localhost:5432/
     username: postgres
     password: ${DB_POSTGRES_PASSWORD}
 
