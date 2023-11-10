@@ -1,6 +1,7 @@
 package be.bavodaniels.finance;
 
 import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
+import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImplFullLookBackStdDev;
 import be.bavodaniels.finance.strategy.Statistics;
 import be.bavodaniels.finance.strategy.Strategy;
@@ -14,10 +15,16 @@ import java.util.logging.Logger;
 public class BackTestStrategy2_FullLookBack {
     private final Logger logger = Logger.getLogger("BackTest");
     public Strategy strategy;
+    private final PriceRepository repository;
 
     @Autowired
     public BackTestStrategy2_FullLookBack(CsvPriceRepositoryImpl priceRepository) {
-        this.strategy = new BuyAndHoldVariablePositionImplFullLookBackStdDev(priceRepository,
+        this.repository = priceRepository;
+
+    }
+
+    public void run(){
+        this.strategy = new BuyAndHoldVariablePositionImplFullLookBackStdDev(repository,
                 "sp500",
                 5,
                 100000,

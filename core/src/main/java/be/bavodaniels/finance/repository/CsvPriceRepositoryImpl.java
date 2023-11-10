@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class CsvPriceRepositoryImpl implements PriceRepository {
@@ -73,16 +74,22 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
     @Override
     public List<Double> getPricesFromDataUpUntilDate(String asset, LocalDate from, LocalDate to) {
         Map<LocalDate, Double> prices = getPrices(asset);
-        List<LocalDate> keys = prices.keySet().stream().filter(d -> d.isBefore(to) || d.isEqual(to))
-                .filter(d -> d.isAfter(from) || d.isEqual(from)).toList();
+        List<LocalDate> keys = prices.keySet()
+                .parallelStream()
+                .filter(d -> d.isBefore(to) || d.isEqual(to))
+                .filter(d -> d.isAfter(from) || d.isEqual(from))
+                .collect(Collectors.toUnmodifiableList());
 
-        return keys.stream().map(prices::get).toList();
+        return keys.parallelStream().map(prices::get).toList();
     }
 
     public List<TimeSeriesEntry> findAll(String asset) {
-        try (Reader reader = new FileReader(new ClassPathResource("sp500.csv").getFile())) {
+        try (Reader reader = new FileReader(new ClassPathResource(asset + ".csv").getFile())) {
+            Map<LocalDate, Double> output = new LinkedHashMap<>();
             List<TimeSeriesEntry> records = new CsvToBeanBuilder<TimeSeriesEntry>(reader)
                     .withType(TimeSeriesEntry.class).build().parse();
+            records.forEach(record -> output.put(LocalDate.parse(record.getDate()), record.getUnderlying()));
+            underlyingCache.put(asset, output);
             return records;
         } catch (IOException e) {
             throw new RuntimeException(e);

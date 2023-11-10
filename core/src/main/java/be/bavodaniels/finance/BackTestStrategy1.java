@@ -1,6 +1,7 @@
 package be.bavodaniels.finance;
 
 import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
+import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.strategy.BuyAndHoldStrategySingleContractImpl;
 import be.bavodaniels.finance.strategy.Statistics;
 import be.bavodaniels.finance.strategy.Strategy;
@@ -14,10 +15,15 @@ import java.util.logging.Logger;
 public class BackTestStrategy1 {
     private final Logger logger = Logger.getLogger("BackTest");
     public Strategy strategy;
+    private final PriceRepository repository;
 
     @Autowired
     public BackTestStrategy1(CsvPriceRepositoryImpl priceRepository) {
-        this.strategy = new BuyAndHoldStrategySingleContractImpl(priceRepository, "sp500", 5);
+        this.repository = priceRepository;
+    }
+
+    public void run(){
+        this.strategy = new BuyAndHoldStrategySingleContractImpl(repository, "sp500", 5);
 
         LocalDate startDate = LocalDate.parse("1982-11-14");
         LocalDate endDate = LocalDate.parse("2022-09-30");
