@@ -7,7 +7,10 @@ import be.bavodaniels.finance.standarddeviation.FullDataSetStandardDeviation;
 import be.bavodaniels.finance.standarddeviation.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
-import tech.tablesaw.api.*;
+import tech.tablesaw.api.DateColumn;
+import tech.tablesaw.api.DoubleColumn;
+import tech.tablesaw.api.IntColumn;
+import tech.tablesaw.api.Table;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,18 +22,22 @@ import java.util.function.Predicate;
 
 public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
     private final PriceRepository priceRepository;
+    private static final int minimalContractsToHold = 4;
     private final String asset;
-    private final Integer minimalContractsToHold = 4;
     private final int multiplier;
     private final List<Transaction> transactions = new ArrayList<>();
     private final double allocatedCapital;
     private final double targetRisk;
     private final StandardDeviation stddev;
+    private final DateColumn dateColumn = DateColumn.create("date");
+    private final DoubleColumn backAdjustedPriceColumn = DoubleColumn.create("backAdjustedPrice");
+    private final DoubleColumn actualPriceColumn = DoubleColumn.create("actualPrice");
+    private final IntColumn contractsHeldColumn = IntColumn.create("contractsHeld");
     private Table accounting = Table.create("accounting",
-            DateColumn.create("date"),
-            DoubleColumn.create("backAdjustedPrice"),
-            DoubleColumn.create("actualPrice"),
-            IntColumn.create("contractsHeld")
+            dateColumn,
+            backAdjustedPriceColumn,
+            actualPriceColumn,
+            contractsHeldColumn
     );
 
     public BuyAndHoldVariablePositionImplFullDataStdDev(PriceRepository priceRepository,
@@ -64,8 +71,7 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
 
     @Override
     public void run(LocalDate date) {
-        Row row = accounting.appendRow();
-        row.setDate(accounting.columnIndex("date"), date);
+        dateColumn.append(date);
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
 
@@ -74,19 +80,21 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
             underlyingPrice = getPreviousWorkingDayUnderlyingPrice(date);
         }
 
-        row.setDouble(accounting.columnIndex("backAdjustedPrice"), price);
-        row.setDouble(accounting.columnIndex("actualPrice"), underlyingPrice);
+        backAdjustedPriceColumn.append(price);
+        actualPriceColumn.append(underlyingPrice);
 
+        int contractsToHold = 0;
         if (minimalCapitalRequirementIsMet(date)) {
-            int contractsToHold = calculateContractsToHold(underlyingPrice, date);
+            contractsToHold = calculateContractsToHold(underlyingPrice, date);
             transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
-            row.setInt(accounting.columnIndex("contractsHeld"), contractsToHold);
         }
+        contractsHeldColumn.append(contractsToHold);
     }
 
     private int calculateContractsToHold(Double underlyingPrice, LocalDate date) {
         double contractsFractional = (allocatedCapital * targetRisk) / (multiplier * underlyingPrice * stddev.calculate(date));
-        return Double.valueOf(contractsFractional).intValue();
+        int wholeContracts = Double.valueOf(contractsFractional).intValue();
+        return  wholeContracts >= minimalContractsToHold ? wholeContracts : 0;
     }
 
     private int getAmountOfOpenContracts() {

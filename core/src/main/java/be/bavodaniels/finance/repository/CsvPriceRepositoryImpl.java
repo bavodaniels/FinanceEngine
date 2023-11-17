@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Component
 public class CsvPriceRepositoryImpl implements PriceRepository {
@@ -66,21 +65,21 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
     @Override
     public List<Double> getPricesUpUntilDate(String asset, LocalDate date) {
         Map<LocalDate, Double> prices = getPrices(asset);
-        List<LocalDate> keys = prices.keySet().stream().filter(d -> d.isBefore(date) || d.isEqual(date)).toList();
-
-        return keys.stream().map(prices::get).toList();
+        return prices.keySet()
+                .parallelStream()
+                .filter(d -> d.isBefore(date) || d.isEqual(date))
+                .map(prices::get)
+                .toList();
     }
 
     @Override
     public List<Double> getPricesFromDataUpUntilDate(String asset, LocalDate from, LocalDate to) {
         Map<LocalDate, Double> prices = getPrices(asset);
-        List<LocalDate> keys = prices.keySet()
+        return prices.keySet()
                 .parallelStream()
-                .filter(d -> d.isBefore(to) || d.isEqual(to))
-                .filter(d -> d.isAfter(from) || d.isEqual(from))
-                .collect(Collectors.toUnmodifiableList());
-
-        return keys.parallelStream().map(prices::get).toList();
+                .filter(d -> (d.isBefore(to) || d.isEqual(to)) && (d.isAfter(from) || d.isEqual(from)))
+                .map(prices::get)
+                .toList();
     }
 
     public List<TimeSeriesEntry> findAll(String asset) {

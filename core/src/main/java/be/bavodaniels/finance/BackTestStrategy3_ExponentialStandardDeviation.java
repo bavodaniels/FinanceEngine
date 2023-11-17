@@ -32,8 +32,6 @@ public class BackTestStrategy3_ExponentialStandardDeviation {
         LocalDate startDate = LocalDate.parse("1982-11-14");
         LocalDate endDate = LocalDate.parse("2022-09-30");
 
-        logger.info("years of data " + (endDate.toEpochDay() - startDate.toEpochDay()) / 306.25);
-
         while (startDate.isBefore(endDate)){
             strategy.run(startDate);
             startDate = startDate.plusDays(1L);
