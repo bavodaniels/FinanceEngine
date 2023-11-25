@@ -2,7 +2,7 @@ package be.bavodaniels.finance;
 
 import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
-import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImplFullDataStdDev;
+import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionFullDataSetStdDev;
 import be.bavodaniels.finance.strategy.Statistics;
 import be.bavodaniels.finance.strategy.Strategy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class BackTestStrategy2_FullDataSet {
     }
 
     public void run(){
-        this.strategy = new BuyAndHoldVariablePositionImplFullDataStdDev(repository,
+        this.strategy = new BuyAndHoldVariablePositionFullDataSetStdDev(repository,
                 "sp500",
                 5,
                 100000,
@@ -41,6 +41,6 @@ public class BackTestStrategy2_FullDataSet {
 
         Statistics stats = strategy.getStatistics();
 
-        System.out.println(stats);
+        System.out.println("Strategy2 fullDataSet: " + stats);
     }
 }

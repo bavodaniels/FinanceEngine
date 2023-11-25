@@ -3,7 +3,6 @@ package be.bavodaniels.finance.strategy;
 import be.bavodaniels.finance.model.Transaction;
 import be.bavodaniels.finance.model.TransactionType;
 import be.bavodaniels.finance.repository.PriceRepository;
-import be.bavodaniels.finance.standarddeviation.FullDataSetStandardDeviation;
 import be.bavodaniels.finance.standarddeviation.StandardDeviation;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
@@ -20,15 +19,13 @@ import java.util.List;
 import java.util.function.Predicate;
 
 
-public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
+public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Strategy {
     private final PriceRepository priceRepository;
     private static final int minimalContractsToHold = 4;
     private final String asset;
-    private final int multiplier;
     private final List<Transaction> transactions = new ArrayList<>();
     private final double allocatedCapital;
-    private final double targetRisk;
-    private final StandardDeviation stddev;
+    private ContractsToHoldCalculator contractsToHoldCalculator;
     private final DateColumn dateColumn = DateColumn.create("date");
     private final DoubleColumn backAdjustedPriceColumn = DoubleColumn.create("backAdjustedPrice");
     private final DoubleColumn actualPriceColumn = DoubleColumn.create("actualPrice");
@@ -40,61 +37,36 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
             contractsHeldColumn
     );
 
-    public BuyAndHoldVariablePositionImplFullDataStdDev(PriceRepository priceRepository,
-                                                        String asset,
-                                                        int multiplier,
-                                                        double allocatedCapital,
-                                                        double targetRisk) {
+    protected AbstractBuyAndHoldVariablePositionStrategy(PriceRepository priceRepository,
+                                                         String asset,
+                                                         int multiplier,
+                                                         double allocatedCapital,
+                                                         double targetRisk,
+                                                         StandardDeviation stddev) {
         this.priceRepository = priceRepository;
         this.asset = asset;
-        this.multiplier = multiplier;
         this.allocatedCapital = allocatedCapital;
-        this.targetRisk = targetRisk;
-
-        this.stddev = new FullDataSetStandardDeviation(priceRepository, asset);
-    }
-
-    protected BuyAndHoldVariablePositionImplFullDataStdDev(PriceRepository priceRepository,
-                                                        String asset,
-                                                        int multiplier,
-                                                        double allocatedCapital,
-                                                        double targetRisk,
-                                                           StandardDeviation stddev) {
-        this.priceRepository = priceRepository;
-        this.asset = asset;
-        this.multiplier = multiplier;
-        this.allocatedCapital = allocatedCapital;
-        this.targetRisk = targetRisk;
-
-        this.stddev = stddev;
+        this.contractsToHoldCalculator = new ContractsToHoldCalculator(targetRisk, multiplier, minimalContractsToHold, stddev);
     }
 
     @Override
     public void run(LocalDate date) {
-        dateColumn.append(date);
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
 
         if (price == null) {
-            price = getPreviousWorkingDayPrice(date);
-            underlyingPrice = getPreviousWorkingDayUnderlyingPrice(date);
+            price = priceRepository.getPrice(asset, date.minusDays(1L));
+            underlyingPrice = priceRepository.getUnderlyingPrice(asset, date.minusDays(1L));
         }
 
+
+        int contractsToHold = contractsToHoldCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
+        transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
+
+        dateColumn.append(date);
         backAdjustedPriceColumn.append(price);
         actualPriceColumn.append(underlyingPrice);
-
-        int contractsToHold = 0;
-        if (minimalCapitalRequirementIsMet(date)) {
-            contractsToHold = calculateContractsToHold(underlyingPrice, date);
-            transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
-        }
         contractsHeldColumn.append(contractsToHold);
-    }
-
-    private int calculateContractsToHold(Double underlyingPrice, LocalDate date) {
-        double contractsFractional = (allocatedCapital * targetRisk) / (multiplier * underlyingPrice * stddev.calculate(date));
-        int wholeContracts = Double.valueOf(contractsFractional).intValue();
-        return  wholeContracts >= minimalContractsToHold ? wholeContracts : 0;
     }
 
     private int getAmountOfOpenContracts() {
@@ -103,30 +75,6 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
                 .reduce(Integer::sum)
                 .orElse(0);
         return contractsHeld;
-    }
-
-    private boolean minimalCapitalRequirementIsMet(LocalDate date) {
-        return allocatedCapital > ((multiplier * getPreviousWorkingDayPrice(date) * 1.0 * stddev.calculate(date)) / targetRisk);
-    }
-
-    private Double getPreviousWorkingDayPrice(LocalDate date) {
-        int daysToSubstract = 1;
-        Double price = priceRepository.getPrice(asset, date.minusDays(daysToSubstract));
-        while (price == null) {
-            daysToSubstract++;
-            price = priceRepository.getPrice(asset, date.minusDays(daysToSubstract));
-        }
-        return price;
-    }
-
-    private Double getPreviousWorkingDayUnderlyingPrice(LocalDate date) {
-        int daysToSubstract = 1;
-        Double price = priceRepository.getUnderlyingPrice(asset, date.minusDays(daysToSubstract));
-        while (price == null) {
-            daysToSubstract++;
-            price = priceRepository.getUnderlyingPrice(asset, date.minusDays(daysToSubstract));
-        }
-        return price;
     }
 
     @Override
@@ -144,7 +92,6 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
         DateColumn dateColumn = accounting.dateColumn("date");
         DoubleColumn backAdjustedPrice = accounting.doubleColumn("backAdjustedPrice");
         IntColumn contractsHeld = accounting.intColumn("contractsHeld");
-        DoubleColumn actualPrice = accounting.doubleColumn("actualPrice");
 
         DoubleColumn returnPricePoints = DoubleColumn.create("returnPricePoints")
                 .append(DoubleColumn.create("priceChange")
@@ -152,7 +99,7 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
                         .subtract(backAdjustedPrice.lag(1))
                         .multiply(contractsHeld.lag(1)));
         DoubleColumn returnBaseCurrency = DoubleColumn.create("returnBaseCurrency")
-                .append(returnPricePoints.multiply(multiplier));
+                .append(returnPricePoints.multiply(5));
         DoubleColumn returns = DoubleColumn.create("returnPercentage")
                 .append(returnBaseCurrency.divide(allocatedCapital));
         DoubleColumn cumsum = DoubleColumn.create("CumulativeSum")
@@ -191,5 +138,14 @@ public class BuyAndHoldVariablePositionImplFullDataStdDev implements Strategy {
         //0.3	-0.003141953
         //0.7	0.00398731
         //0.99	0.031177895
+//        return new Statistics(0.0,
+//                0.0,
+//                0.0,
+//                0.0,
+//                0.0,
+//                0.0,
+//                0.0,
+//                0.0,
+//                0.0);
     }
 }

@@ -42,6 +42,6 @@ public class BackTestStrategy2_FullLookBack {
 
         Statistics stats = strategy.getStatistics();
 
-        System.out.println(stats);
+        System.out.println("Strategy2 fullLookBack: " + stats);
     }
 }

@@ -41,6 +41,6 @@ public class BackTestStrategy3_ExponentialStandardDeviation {
 
         Statistics stats = strategy.getStatistics();
 
-        System.out.println(stats);
+        System.out.println("Strategy2 ExponentialStdDev: " + stats);
     }
 }

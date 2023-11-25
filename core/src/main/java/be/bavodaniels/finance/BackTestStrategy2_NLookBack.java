@@ -43,6 +43,6 @@ public class BackTestStrategy2_NLookBack {
 
         Statistics stats = strategy.getStatistics();
 
-        System.out.println(stats);
+        System.out.println("Strategy2 NLookBack: " + stats);
     }
 }

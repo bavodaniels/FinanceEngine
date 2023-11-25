@@ -54,12 +54,25 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
 
     @Override
     public Double getPrice(String symbol, LocalDate date) {
-        return getPrices(symbol).get(date);
+        Map<LocalDate, Double> prices = getPrices(symbol);
+        return getValue(date, prices);
     }
 
     @Override
     public Double getUnderlyingPrice(String symbol, LocalDate date) {
-        return getUnderlyingPrices(symbol).get(date);
+        Map<LocalDate, Double> prices = getUnderlyingPrices(symbol);
+        return getValue(date, prices);
+    }
+
+    private static Double getValue(LocalDate date, Map<LocalDate, Double> prices) {
+        Double price = null;
+        long subtract = 0L;
+
+        while(price == null){
+            price = prices.get(date.minusDays(subtract++));
+        }
+
+        return price;
     }
 
     @Override

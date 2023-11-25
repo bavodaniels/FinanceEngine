@@ -4,7 +4,7 @@ import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.standarddeviation.ExponentialStandardDeviation;
 
 
-public class BuyAndHoldVariablePositionImplExponentialStdDev extends BuyAndHoldVariablePositionImplFullDataStdDev {
+public class BuyAndHoldVariablePositionImplExponentialStdDev extends AbstractBuyAndHoldVariablePositionStrategy {
     public BuyAndHoldVariablePositionImplExponentialStdDev(PriceRepository priceRepository,
                                                            String asset,
                                                            int multiplier,

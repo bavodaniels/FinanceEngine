@@ -37,6 +37,6 @@ public class BackTestStrategy1 {
 
         Statistics stats = strategy.getStatistics();
 
-        System.out.println(stats);
+        System.out.println("Strategy1 " + stats);
     }
 }

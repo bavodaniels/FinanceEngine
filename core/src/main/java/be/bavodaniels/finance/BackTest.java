@@ -21,7 +21,7 @@ public class BackTest {
 
         repository.findAll("sp500");
 
-//        backtests.add(Thread.startVirtualThread(strategy1::run));
+        backtests.add(Thread.startVirtualThread(strategy1::run));
         backtests.add(Thread.startVirtualThread(strategy2FullDataSet::run));
         backtests.add(Thread.startVirtualThread(strategy2FullLookBack::run));
         backtests.add(Thread.startVirtualThread(strategy2NLookBack::run));

@@ -4,7 +4,7 @@ import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.standarddeviation.FullLookBackStandardDeviation;
 
 
-public class BuyAndHoldVariablePositionImplFullLookBackStdDev extends BuyAndHoldVariablePositionImplFullDataStdDev {
+public class BuyAndHoldVariablePositionImplFullLookBackStdDev extends AbstractBuyAndHoldVariablePositionStrategy {
     public BuyAndHoldVariablePositionImplFullLookBackStdDev(PriceRepository priceRepository,
                                                             String asset,
                                                             int multiplier,
