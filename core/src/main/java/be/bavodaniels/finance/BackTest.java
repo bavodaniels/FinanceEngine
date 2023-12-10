@@ -20,6 +20,7 @@ public class BackTest {
         List<Thread> backtests = new ArrayList<>();
 
         repository.findAll("sp500");
+        repository.findAll("us10");
 
         backtests.add(Thread.startVirtualThread(strategy1::run));
         backtests.add(Thread.startVirtualThread(strategy2FullDataSet::run));
