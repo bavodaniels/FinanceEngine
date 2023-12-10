@@ -25,7 +25,7 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
     private final String asset;
     private final List<Transaction> transactions = new ArrayList<>();
     private final double allocatedCapital;
-    private ContractsToHoldCalculator contractsToHoldCalculator;
+    private final ContractsToHoldCalculator contractsToHoldCalculator;
     private final DateColumn dateColumn = DateColumn.create("date");
     private final DoubleColumn backAdjustedPriceColumn = DoubleColumn.create("backAdjustedPrice");
     private final DoubleColumn actualPriceColumn = DoubleColumn.create("actualPrice");
@@ -131,21 +131,33 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
                 BigDecimal.valueOf(p.evaluate(1)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 BigDecimal.valueOf(p.evaluate(30)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 BigDecimal.valueOf(p.evaluate(70)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-                BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue()
+                BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
+                calculateTurnOver(transactions)
         );
 
         //0.01	-0.03203738
         //0.3	-0.003141953
         //0.7	0.00398731
         //0.99	0.031177895
-//        return new Statistics(0.0,
-//                0.0,
-//                0.0,
-//                0.0,
-//                0.0,
-//                0.0,
-//                0.0,
-//                0.0,
-//                0.0);
+    }
+
+    private double calculateTurnOver(List<Transaction> transactions) {
+        List<Double> pctChange = new ArrayList<>();
+
+
+        for (int i = 1; i < transactions.size(); i++) {
+            Transaction currentTransaction = transactions.get(i);
+            Transaction previousTransaction = transactions.get(i - 1);
+            pctChange.add(calculatePercentageChange(currentTransaction, previousTransaction));
+        }
+
+        return pctChange.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
+    }
+
+    private static double calculatePercentageChange(Transaction currentTransaction, Transaction previousTransaction) {
+        if (previousTransaction.amount() != 0)
+            return ((double) currentTransaction.amount() / (double) previousTransaction.amount()) - 1.0;
+        else
+            return 0.0;
     }
 }

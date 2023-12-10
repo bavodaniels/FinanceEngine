@@ -140,7 +140,8 @@ public class BuyAndHoldStrategySingleContractImpl implements Strategy {
                 new BigDecimal(p.evaluate(1)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 new BigDecimal(p.evaluate(30)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 new BigDecimal(p.evaluate(70)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-                new BigDecimal(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue()
+                new BigDecimal(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
+                0
         );
 
         //0.01	-0.03203738
