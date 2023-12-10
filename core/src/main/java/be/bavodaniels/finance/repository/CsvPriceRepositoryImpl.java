@@ -20,7 +20,7 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
 
     private Map<LocalDate, Double> getPrices(String symbol) {
         if (!cache.containsKey(symbol)) {
-            try (Reader reader = new FileReader(new ClassPathResource("sp500.csv").getFile())) {
+            try (Reader reader = new FileReader(new ClassPathResource(symbol + ".csv").getFile())) {
                 Map<LocalDate, Double> output = new LinkedHashMap<>();
                 List<TimeSeriesEntry> records = new CsvToBeanBuilder<TimeSeriesEntry>(reader)
                         .withType(TimeSeriesEntry.class).build().parse();
@@ -37,7 +37,7 @@ public class CsvPriceRepositoryImpl implements PriceRepository {
 
     private Map<LocalDate, Double> getUnderlyingPrices(String symbol) {
         if (!underlyingCache.containsKey(symbol)) {
-            try (Reader reader = new FileReader(new ClassPathResource("sp500.csv").getFile())) {
+            try (Reader reader = new FileReader(new ClassPathResource(symbol + ".csv").getFile())) {
                 Map<LocalDate, Double> output = new LinkedHashMap<>();
                 List<TimeSeriesEntry> records = new CsvToBeanBuilder<TimeSeriesEntry>(reader)
                         .withType(TimeSeriesEntry.class).build().parse();
