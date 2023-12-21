@@ -1,6 +1,5 @@
 package be.bavodaniels.finance;
 
-import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.strategy.BuyAndHoldStrategySingleContractImpl;
 import be.bavodaniels.finance.strategy.Statistics;
@@ -18,7 +17,7 @@ public class BackTestStrategy1 {
     private final PriceRepository repository;
 
     @Autowired
-    public BackTestStrategy1(CsvPriceRepositoryImpl priceRepository) {
+    public BackTestStrategy1(PriceRepository priceRepository) {
         this.repository = priceRepository;
     }
 

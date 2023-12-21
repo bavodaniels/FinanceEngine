@@ -1,8 +1,8 @@
-package be.bavodaniels.finance.repository;
+package be.bavodaniels.finance.repository.csv;
 
+import be.bavodaniels.finance.repository.PriceRepository;
 import com.opencsv.bean.CsvToBeanBuilder;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.stereotype.Component;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+//@Component
 public class CsvPriceRepositoryImpl implements PriceRepository {
     Map<String, Map<LocalDate, Double>> cache = new HashMap<>();
     Map<String, Map<LocalDate, Double>> underlyingCache = new HashMap<>();

@@ -1,8 +1,9 @@
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.apache.commons:commons-math4-core:4.0-beta1'
     implementation 'org.apache.commons:commons-math4-legacy:4.0-beta1'
     implementation 'tech.tablesaw:tablesaw-core:0.43.1'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
 }
 repositories {
     mavenCentral()

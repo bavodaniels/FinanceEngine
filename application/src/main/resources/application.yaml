@@ -6,10 +6,10 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 30
+          batch_size: 1
     show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/
+    url: jdbc:postgresql://nas.local:5433/
     username: postgres
     password: ${DB_POSTGRES_PASSWORD}
 

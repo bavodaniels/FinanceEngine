@@ -1,6 +1,5 @@
 package be.bavodaniels.finance;
 
-import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImplFullLookBackStdDev;
 import be.bavodaniels.finance.strategy.Statistics;
@@ -18,7 +17,7 @@ public class BackTestStrategy2_FullLookBack {
     private final PriceRepository repository;
 
     @Autowired
-    public BackTestStrategy2_FullLookBack(CsvPriceRepositoryImpl priceRepository) {
+    public BackTestStrategy2_FullLookBack(PriceRepository priceRepository) {
         this.repository = priceRepository;
 
     }

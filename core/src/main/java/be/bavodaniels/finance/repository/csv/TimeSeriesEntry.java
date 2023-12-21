@@ -1,4 +1,4 @@
-package be.bavodaniels.finance.repository;
+package be.bavodaniels.finance.repository.csv;
 
 import com.opencsv.bean.CsvBindByName;
 

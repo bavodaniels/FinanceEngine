@@ -1,6 +1,5 @@
 package be.bavodaniels.finance;
 
-import be.bavodaniels.finance.repository.CsvPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.strategy.BuyAndHoldVariablePositionImplExponentialStdDev;
 import be.bavodaniels.finance.strategy.Statistics;
@@ -18,7 +17,7 @@ public class BackTestStrategy3_ExponentialStandardDeviation {
     private final PriceRepository repository;
 
     @Autowired
-    public BackTestStrategy3_ExponentialStandardDeviation(CsvPriceRepositoryImpl priceRepository) {
+    public BackTestStrategy3_ExponentialStandardDeviation(PriceRepository priceRepository) {
         this.repository = priceRepository;
     }
 
