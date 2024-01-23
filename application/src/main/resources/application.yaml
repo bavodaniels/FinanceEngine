@@ -7,10 +7,22 @@ spring:
       hibernate:
         jdbc:
           batch_size: 1
-    show-sql: true
+    show-sql: false
+
   datasource:
-    url: jdbc:postgresql://nas.local:5433/
+    url: jdbc:postgresql://nas.local:5433/stocks
     username: postgres
     password: ${DB_POSTGRES_PASSWORD}
 
 
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        orm:
+          jdbc:
+            bind: trace
+        stat: debug
+        SQL_SLOW: info
+        cache: debug
