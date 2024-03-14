@@ -17,8 +17,6 @@ public class BackTest {
 
         List<Thread> backtests = new ArrayList<>();
 
-
-
         Strategy stratsp500 = new BuyAndHoldVariablePositionImplExponentialStdDev(repository, "sp500", 5, 100000.0, 0.20);
         Strategy stratus10 = new BuyAndHoldVariablePositionImplExponentialStdDev(repository, "us10", 5, 100000.0, 0.20);
 

@@ -3,7 +3,7 @@ package be.bavodaniels.finance.strategy;
 import be.bavodaniels.finance.model.Transaction;
 import be.bavodaniels.finance.model.TransactionType;
 import be.bavodaniels.finance.repository.PriceRepository;
-import be.bavodaniels.finance.standarddeviation.StandardDeviation;
+import be.bavodaniels.finance.risktargetcalculator.RiskTargetCalculator;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 import org.apache.commons.math3.stat.ranking.NaNStrategy;
 import tech.tablesaw.api.DateColumn;
@@ -21,11 +21,10 @@ import java.util.function.Predicate;
 
 public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Strategy {
     private final PriceRepository priceRepository;
-    private static final int minimalContractsToHold = 4;
     private final String asset;
     private final List<Transaction> transactions = new ArrayList<>();
     private final double allocatedCapital;
-    private final ContractsToHoldCalculator contractsToHoldCalculator;
+    private final RiskTargetCalculator riskTargetCalculator;
     private final DateColumn dateColumn = DateColumn.create("date");
     private final DoubleColumn backAdjustedPriceColumn = DoubleColumn.create("backAdjustedPrice");
     private final DoubleColumn actualPriceColumn = DoubleColumn.create("actualPrice");
@@ -39,14 +38,12 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
 
     protected AbstractBuyAndHoldVariablePositionStrategy(PriceRepository priceRepository,
                                                          String asset,
-                                                         int multiplier,
                                                          double allocatedCapital,
-                                                         double targetRisk,
-                                                         StandardDeviation stddev) {
+                                                         RiskTargetCalculator riskTargetCalculator) {
         this.priceRepository = priceRepository;
         this.asset = asset;
         this.allocatedCapital = allocatedCapital;
-        this.contractsToHoldCalculator = new ContractsToHoldCalculator(targetRisk, multiplier, minimalContractsToHold, stddev);
+        this.riskTargetCalculator = riskTargetCalculator;
     }
 
     @Override
@@ -62,7 +59,7 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         }
 
 
-        int contractsToHold = contractsToHoldCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
+        int contractsToHold = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
         transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
 
         dateColumn.append(date);
@@ -136,11 +133,6 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
                 BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 calculateTurnOver(transactions)
         );
-
-        //0.01	-0.03203738
-        //0.3	-0.003141953
-        //0.7	0.00398731
-        //0.99	0.031177895
     }
 
     private double calculateTurnOver(List<Transaction> transactions) {
