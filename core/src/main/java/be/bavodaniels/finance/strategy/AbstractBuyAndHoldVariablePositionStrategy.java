@@ -51,13 +51,6 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
 
-        int daysToSubstract = 1;
-        while (price == null) {
-            price = priceRepository.getPrice(asset, date.minusDays(daysToSubstract));
-            underlyingPrice = priceRepository.getUnderlyingPrice(asset, date.minusDays(daysToSubstract));
-            daysToSubstract += 1;
-        }
-
 
         int contractsToHold = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
         transactions.add(new Transaction(date, price, contractsToHold, TransactionType.BUY));
