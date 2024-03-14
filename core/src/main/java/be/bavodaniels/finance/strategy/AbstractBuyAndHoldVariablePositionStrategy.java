@@ -39,19 +39,15 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
 
+        if(price != null) {
+            int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
+            int amountBought = contractsHeld - getAmountOfOpenContracts();
+            if (amountBought > 0)
+                transactions.add(new Transaction(date, price, amountBought, TransactionType.BUY));
+            else
+                transactions.add(new Transaction(date, price, amountBought * -1, TransactionType.SELL));
 
-        int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
-        transactions.add(new Transaction(date, price, contractsHeld, TransactionType.BUY));
-
-        accounting.register(date, price, underlyingPrice, contractsHeld);
-    }
-
-    @Override
-    public void sellAll(LocalDate date) {
-        int amountOfOpenContracts = getAmountOfOpenContracts();
-        if (amountOfOpenContracts > 0) {
-            Double price = priceRepository.getPrice(asset, date);
-            transactions.add(new Transaction(date, price, amountOfOpenContracts, TransactionType.SELL));
+            accounting.register(date, price, underlyingPrice, contractsHeld);
         }
     }
 

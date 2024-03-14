@@ -14,7 +14,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
 
 public class AccountingImpl implements Accounting {
     private final DateColumn dateColumn = DateColumn.create("date");
@@ -38,7 +37,6 @@ public class AccountingImpl implements Accounting {
 
     @Override
     public Statistics getStatistics(double allocatedCapital) {
-        accounting = accounting.dropWhere(accounting.dateColumn("date").eval((Predicate<LocalDate>) localDate -> localDate.getDayOfWeek().ordinal() > 4));
         DoubleColumn backAdjustedPrice = accounting.doubleColumn("backAdjustedPrice");
         IntColumn contractsHeld = accounting.intColumn("contractsHeld");
 

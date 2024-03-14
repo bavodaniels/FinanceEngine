@@ -1,7 +1,6 @@
 package be.bavodaniels.finance.strategy;
 
 import be.bavodaniels.finance.accounting.AccountingImpl;
-import be.bavodaniels.finance.repository.NonNullPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.risktargetcalculator.RiskTargetCalculator;
 import be.bavodaniels.finance.standarddeviation.ExponentialStandardDeviation;
@@ -13,7 +12,7 @@ public class BuyAndHoldVariablePositionImplExponentialStdDev extends AbstractBuy
                                                            int multiplier,
                                                            double allocatedCapital,
                                                            double targetRisk) {
-        super(new NonNullPriceRepositoryImpl(priceRepository),
+        super(priceRepository,
                 asset,
                 allocatedCapital,
                 RiskTargetCalculator.builder()

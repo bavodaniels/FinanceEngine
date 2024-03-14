@@ -35,8 +35,6 @@ public class BackTest {
             startDate = startDate.plusDays(1L);
         }
 
-        strategy.sellAll(endDate);
-
         System.out.println(strategy.getStatistics());
     }
 }
