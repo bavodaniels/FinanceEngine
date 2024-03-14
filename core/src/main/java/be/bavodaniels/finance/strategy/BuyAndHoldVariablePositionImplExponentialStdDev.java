@@ -1,5 +1,6 @@
 package be.bavodaniels.finance.strategy;
 
+import be.bavodaniels.finance.accounting.AccountingImpl;
 import be.bavodaniels.finance.repository.NonNullPriceRepositoryImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.risktargetcalculator.RiskTargetCalculator;
@@ -20,6 +21,7 @@ public class BuyAndHoldVariablePositionImplExponentialStdDev extends AbstractBuy
                         .multiplier(multiplier)
                         .standardDeviation(new ExponentialStandardDeviation(priceRepository, asset))
                         .minimumContracts(4)
-                        .build());
+                        .build(),
+                new AccountingImpl());
     }
 }
