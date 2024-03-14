@@ -31,8 +31,13 @@ public class BackTest {
         LocalDate endDate = LocalDate.parse("2022-09-30");
 
         while (startDate.isBefore(endDate)){
-            strategy.run(startDate);
+            try {
+                strategy.run(startDate);
+            }catch(RuntimeException e){
+                //do nothing
+            }
             startDate = startDate.plusDays(1L);
+
         }
 
         System.out.println(strategy.getStatistics());

@@ -24,13 +24,20 @@ public class JpaPriceRepositoryImpl implements PriceRepository {
     @Override
     public Double getPrice(String asset, LocalDate date) {
         buildCacheIfNeeded(asset);
-        return cache.get(asset).get(date);
+
+        Double price = cache.get(asset).get(date);
+        if (price == null)
+            throw new RuntimeException("no price for this date");
+        return price;
     }
 
     @Override
     public Double getUnderlyingPrice(String asset, LocalDate date) {
         buildUnderlyingCacheIfNeeded(asset);
-        return underlyingCache.get(asset).get(date);
+        Double price = cache.get(asset).get(date);
+        if (price == null)
+            throw new RuntimeException("no price for this date");
+        return price;
     }
 
     @Override
