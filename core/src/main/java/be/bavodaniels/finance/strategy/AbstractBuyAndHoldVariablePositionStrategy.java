@@ -42,24 +42,25 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
     public void run(LocalDate date) {
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
-        int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
-        int changeAmount = contractsHeld - getAmountOfOpenContracts();
-        if (ta.confidence(date) > 0) {
-            if (changeAmount > 0)
-                transactions.add(new Transaction(date, price, changeAmount, TransactionType.BUY));
-            else
-                transactions.add(new Transaction(date, price, changeAmount * -1, TransactionType.SELL));
+        int confidence = ta.confidence(date);
 
-        } else {
-            contractsHeld = 0;
-            transactions.add(new Transaction(date, price, contractsHeld, TransactionType.SELL));
+        int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
+        if (confidence < 0) {
+            contractsHeld = contractsHeld * -1;
         }
+        int changeAmount = contractsHeld - getAmountOfOpenContracts();
+
+        if (confidence > 0)
+            transactions.add(new Transaction(date, price, changeAmount, TransactionType.LONG));
+        else
+            transactions.add(new Transaction(date, price, changeAmount * -1, TransactionType.SHORT));
+
         accounting.register(date, price, underlyingPrice, contractsHeld);
     }
 
     private int getAmountOfOpenContracts() {
         int contractsHeld = transactions.stream()
-                .map(transaction -> transaction.type() == TransactionType.BUY ? transaction.amount() : transaction.amount() * -1)
+                .map(transaction -> transaction.type() == TransactionType.LONG ? transaction.amount() : transaction.amount() * -1)
                 .reduce(Integer::sum)
                 .orElse(0);
         return contractsHeld;
