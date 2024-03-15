@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class AccountingImpl implements Accounting {
     private final DateColumn dateColumn = DateColumn.create("date");
@@ -68,8 +69,8 @@ public class AccountingImpl implements Accounting {
                 .withNaNStrategy(NaNStrategy.REMOVED);
         p.setData(deMeaned.asDoubleArray());
 
-//        accounting.where(dateColumn.eval((Predicate<LocalDate>) localDate -> localDate.getDayOfWeek().ordinal() < 5))
-//                .write().csv(this.getClass().getSimpleName() + "-" + asset + ".csv");
+        accounting.where(dateColumn.eval((Predicate<LocalDate>) localDate -> localDate.getDayOfWeek().ordinal() < 5))
+                .write().csv(this.getClass().getSimpleName() + ".csv");
         return new Statistics(returns.removeMissing().mean(),
                 returns.removeMissing().standardDeviation(),
                 drawdown.removeMissing().mean(),

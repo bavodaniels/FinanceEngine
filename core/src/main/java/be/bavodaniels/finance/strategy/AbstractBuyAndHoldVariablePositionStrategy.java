@@ -5,6 +5,7 @@ import be.bavodaniels.finance.model.Transaction;
 import be.bavodaniels.finance.model.TransactionType;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.risktargetcalculator.RiskTargetCalculator;
+import be.bavodaniels.finance.ta.TA;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,19 +20,22 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
     private final double startingCapital;
     private final RiskTargetCalculator riskTargetCalculator;
     private final Accounting accounting;
+    private final TA ta;
 
 
     protected AbstractBuyAndHoldVariablePositionStrategy(PriceRepository priceRepository,
                                                          String asset,
                                                          double allocatedCapital,
                                                          RiskTargetCalculator riskTargetCalculator,
-                                                         Accounting accounting) {
+                                                         Accounting accounting,
+                                                         TA ta) {
         this.priceRepository = priceRepository;
         this.asset = asset;
         this.allocatedCapital = allocatedCapital;
         this.riskTargetCalculator = riskTargetCalculator;
         this.accounting = accounting;
         this.startingCapital = allocatedCapital;
+        this.ta = ta;
     }
 
     @Override
@@ -39,14 +43,18 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         Double price = priceRepository.getPrice(asset, date);
         Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
         int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
-        int amountBought = contractsHeld - getAmountOfOpenContracts();
-        if (amountBought > 0)
-            transactions.add(new Transaction(date, price, amountBought, TransactionType.BUY));
-        else
-            transactions.add(new Transaction(date, price, amountBought * -1, TransactionType.SELL));
+        int changeAmount = contractsHeld - getAmountOfOpenContracts();
+        if (ta.confidence(date) > 0) {
+            if (changeAmount > 0)
+                transactions.add(new Transaction(date, price, changeAmount, TransactionType.BUY));
+            else
+                transactions.add(new Transaction(date, price, changeAmount * -1, TransactionType.SELL));
 
+        } else {
+            contractsHeld = 0;
+            transactions.add(new Transaction(date, price, contractsHeld, TransactionType.SELL));
+        }
         accounting.register(date, price, underlyingPrice, contractsHeld);
-
     }
 
     private int getAmountOfOpenContracts() {
