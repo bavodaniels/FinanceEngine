@@ -55,7 +55,7 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         else
             transactions.add(new Transaction(date, price, changeAmount * -1, TransactionType.SHORT));
 
-        accounting.register(date, price, underlyingPrice, contractsHeld);
+        accounting.register(date, price, underlyingPrice, (double) contractsHeld);
     }
 
     private int getAmountOfOpenContracts() {

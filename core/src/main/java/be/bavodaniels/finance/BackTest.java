@@ -27,7 +27,7 @@ public class BackTest {
     }
 
     private void runStrat(Strategy strategy){
-        LocalDate startDate = LocalDate.parse("1982-11-14");
+        LocalDate startDate = LocalDate.parse("1997-01-02");
         LocalDate endDate = LocalDate.parse("2022-09-30");
 
         while (startDate.isBefore(endDate)){

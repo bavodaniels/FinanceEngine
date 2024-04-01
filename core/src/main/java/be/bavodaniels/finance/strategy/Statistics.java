@@ -22,14 +22,14 @@ public record Statistics(double averageDailyReturn,
                       double percentile99
 //                      double turnover
     ) {
-        this(averageDailyReturn,
-                averageDailyReturn * 256,
-                dailyStandardDeviation,
-                dailyStandardDeviation * 16,
+        this(averageDailyReturn * 100,
+                averageDailyReturn * 100 * 256,
+                dailyStandardDeviation * 100,
+                dailyStandardDeviation * 100 * 16,
                 averageDailyReturn / dailyStandardDeviation,
                 ((averageDailyReturn * 256) / (dailyStandardDeviation * 16)),
-                averageDrawdown,
-                maxDrawdown,
+                averageDrawdown * 100,
+                maxDrawdown * 100,
                 skew,
                 (percentile1 / percentile30) / 4.43,
                 (percentile99 / percentile70) / 4.43);

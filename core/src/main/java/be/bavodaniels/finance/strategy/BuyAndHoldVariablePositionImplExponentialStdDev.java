@@ -4,7 +4,7 @@ import be.bavodaniels.finance.accounting.AccountingImpl;
 import be.bavodaniels.finance.repository.PriceRepository;
 import be.bavodaniels.finance.risktargetcalculator.RiskTargetCalculator;
 import be.bavodaniels.finance.standarddeviation.ExponentialStandardDeviation;
-import be.bavodaniels.finance.ta.EMAC;
+import be.bavodaniels.finance.ta.FixedValue;
 
 
 public class BuyAndHoldVariablePositionImplExponentialStdDev extends AbstractBuyAndHoldVariablePositionStrategy {
@@ -20,9 +20,9 @@ public class BuyAndHoldVariablePositionImplExponentialStdDev extends AbstractBuy
                         .targetRisk(targetRisk)
                         .multiplier(multiplier)
                         .standardDeviation(new ExponentialStandardDeviation(priceRepository, asset))
-                        .minimumContracts(4)
+                        .minimumContracts(0)
                         .build(),
                 new AccountingImpl(),
-                new EMAC(64, 256, priceRepository, asset));
+                new FixedValue(20));
     }
 }

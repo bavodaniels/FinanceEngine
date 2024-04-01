@@ -1,10 +1,9 @@
 package be.bavodaniels.finance.standarddeviation;
 
+import be.bavodaniels.finance.collection.StatisticalList;
 import be.bavodaniels.finance.repository.PriceRepository;
-import tech.tablesaw.api.DoubleColumn;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class FullDataSetStandardDeviation implements StandardDeviation {
     private final PriceRepository priceRepository;
@@ -16,8 +15,7 @@ public class FullDataSetStandardDeviation implements StandardDeviation {
 
     @Override
     public double calculate(LocalDate date) {
-        List<Double> prices = priceRepository.getPricesUpUntilDate(asset, LocalDate.now());
-        DoubleColumn col = DoubleColumn.create("prices", prices);
-        return col.pctChange().standardDeviation() * 16;
+        StatisticalList prices = new StatisticalList(priceRepository.getPricesUpUntilDate(asset, LocalDate.now()));
+        return prices.pctChange().standardDeviation() * 16;
     }
 }
