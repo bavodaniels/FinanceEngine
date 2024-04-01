@@ -40,22 +40,22 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
 
     @Override
     public void run(LocalDate date) {
-        Double price = priceRepository.getPrice(asset, date);
-        Double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
-        int confidence = ta.confidence(date);
+        int forecast = ta.confidence(date);
+        int amountOfOpenContracts = getAmountOfOpenContracts();
+        double underlyingPrice = priceRepository.getUnderlyingPrice(asset, date);
+        double currentPrice = priceRepository.getPrice(asset, date);
+        if (forecast > 0) { // Uptrend
+            int contractsToHold = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
 
-        int contractsHeld = riskTargetCalculator.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
-        if (confidence < 0) {
-            contractsHeld = contractsHeld * -1;
+            if (contractsToHold != amountOfOpenContracts) {
+                int amountToTransact = contractsToHold - amountOfOpenContracts;
+                TransactionType transactionType = amountToTransact > 0 ? TransactionType.LONG : TransactionType.SHORT;
+                transactions.add(new Transaction(date, currentPrice, Math.abs(amountToTransact), transactionType));
+            }
+        } else if (amountOfOpenContracts > 0) { // Downtrend and holding contracts
+            transactions.add(new Transaction(date, currentPrice, amountOfOpenContracts, TransactionType.SHORT));
         }
-        int changeAmount = contractsHeld - getAmountOfOpenContracts();
-
-        if (confidence > 0)
-            transactions.add(new Transaction(date, price, changeAmount, TransactionType.LONG));
-        else
-            transactions.add(new Transaction(date, price, changeAmount * -1, TransactionType.SHORT));
-
-        accounting.register(date, price, underlyingPrice, (double) contractsHeld);
+        accounting.register(date, currentPrice, underlyingPrice, (double) getAmountOfOpenContracts());
     }
 
     private int getAmountOfOpenContracts() {

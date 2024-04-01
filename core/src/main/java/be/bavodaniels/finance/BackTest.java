@@ -34,7 +34,7 @@ public class BackTest {
             try {
                 strategy.run(startDate);
             }catch(RuntimeException e){
-                //do nothing
+                System.out.println(e);
             }
             startDate = startDate.plusDays(1L);
 
