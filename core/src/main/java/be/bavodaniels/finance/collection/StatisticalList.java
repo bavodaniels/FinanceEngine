@@ -1,8 +1,8 @@
 package be.bavodaniels.finance.collection;
 
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.apache.commons.math4.legacy.stat.StatUtils;
 import org.apache.commons.math4.legacy.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math4.legacy.stat.descriptive.moment.StandardDeviation;
 
 import java.util.ArrayList;
 import java.util.Collection;
