@@ -1,7 +1,6 @@
 package be.bavodaniels.finance.accounting;
 
 import be.bavodaniels.finance.collection.StatisticalList;
-import be.bavodaniels.finance.model.Transaction;
 import be.bavodaniels.finance.strategy.Statistics;
 import org.apache.commons.math4.legacy.stat.descriptive.rank.Percentile;
 import org.apache.commons.math4.legacy.stat.ranking.NaNStrategy;
@@ -9,9 +8,7 @@ import org.apache.commons.math4.legacy.stat.ranking.NaNStrategy;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AccountingImpl implements Accounting {
@@ -64,33 +61,5 @@ public class AccountingImpl implements Accounting {
                 BigDecimal.valueOf(p.evaluate(30)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 BigDecimal.valueOf(p.evaluate(70)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
                 BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue());
-//                return new Statistics(mean,
-//                returnPercentage.standardDeviation(),
-//                drawdown.mean(),
-//                drawdown.stream().max(Double::compareTo).orElse(0.0),
-//                returnPercentage.skewness(),
-//                BigDecimal.valueOf(p.evaluate(1)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-//                BigDecimal.valueOf(p.evaluate(30)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-//                BigDecimal.valueOf(p.evaluate(70)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-//                BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue()
-    }
-
-    private double calculateTurnOver(List<Transaction> transactions) {
-        List<Double> pctChange = new ArrayList<>();
-
-        for (int i = 1; i < transactions.size(); i++) {
-            Transaction currentTransaction = transactions.get(i);
-            Transaction previousTransaction = transactions.get(i - 1);
-            pctChange.add(calculatePercentageChange(currentTransaction, previousTransaction));
-        }
-
-        return pctChange.stream().mapToDouble(Double::doubleValue).average().getAsDouble();
-    }
-
-    private static double calculatePercentageChange(Transaction currentTransaction, Transaction previousTransaction) {
-        if (previousTransaction.amount() != 0)
-            return ((double) currentTransaction.amount() / (double) previousTransaction.amount()) - 1.0;
-        else
-            return 0.0;
     }
 }

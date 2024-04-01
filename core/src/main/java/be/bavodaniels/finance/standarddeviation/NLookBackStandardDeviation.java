@@ -18,7 +18,7 @@ public class NLookBackStandardDeviation implements StandardDeviation {
 
     @Override
     public double calculate(LocalDate date) {
-        StatisticalList prices = new StatisticalList(priceRepository.getPricesFromDataUpUntilDate(asset, date.minusDays(lookback), date));
+        StatisticalList prices = new StatisticalList(priceRepository.getPricesFromDateUpUntilDate(asset, date.minusDays(lookback), date));
         return prices.pctChange().standardDeviation() * 16;
     }
 }

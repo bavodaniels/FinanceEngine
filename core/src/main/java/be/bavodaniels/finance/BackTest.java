@@ -34,7 +34,8 @@ public class BackTest {
             try {
                 strategy.run(startDate);
             }catch(RuntimeException e){
-                System.out.println(e);
+                if (!e.getMessage().equalsIgnoreCase("no price for this date"))
+                    System.out.println(e);
             }
             startDate = startDate.plusDays(1L);
 

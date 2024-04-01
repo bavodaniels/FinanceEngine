@@ -5,9 +5,17 @@ import java.util.List;
 
 
 public interface PriceRepository {
-    Double getPrice(String asset, LocalDate date);
-    Double getUnderlyingPrice(String asset, LocalDate date);
+    default Double getPrice(String asset, LocalDate date) {
+        return null;
+    }
+    default Double getUnderlyingPrice(String asset, LocalDate date) {
+        return null;
+    };
 
-    List<Double> getPricesUpUntilDate(String asset, LocalDate date);
-    List<Double> getPricesFromDataUpUntilDate(String asset, LocalDate from, LocalDate to);
+    default List<Double> getPricesUpUntilDate(String asset, LocalDate date){
+        return null;
+    };
+    default List<Double> getPricesFromDateUpUntilDate(String asset, LocalDate from, LocalDate to){
+        return null;
+    };
 }

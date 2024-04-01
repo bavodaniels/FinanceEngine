@@ -7,14 +7,14 @@ import java.time.LocalDate;
 
 public class ExponentialStandardDeviation implements StandardDeviation {
     private final int SHORT_LOOKBACK = 32;
-    private final int LONG_LOOKBACK_YEARS = 2600;
+    private final int LONG_LOOKBACK = 2600;
 
     private final StandardDeviation shortStdDev;
     private final StandardDeviation longStdDev;
 
     public ExponentialStandardDeviation(PriceRepository priceRepository, String asset) {
         this.shortStdDev = new NLookBackStandardDeviation(SHORT_LOOKBACK, priceRepository, asset);
-        this.longStdDev = new NLookBackStandardDeviation(LONG_LOOKBACK_YEARS, priceRepository, asset);
+        this.longStdDev = new NLookBackStandardDeviation(LONG_LOOKBACK, priceRepository, asset);
     }
 
     @Override

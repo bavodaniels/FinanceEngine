@@ -2,7 +2,6 @@ package be.bavodaniels.finance.repository.jpa;
 
 import be.bavodaniels.finance.repository.PriceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -10,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+//@Component
 public class JpaPriceRepositoryImpl implements PriceRepository {
     Map<String, Map<LocalDate, Double>> cache = new HashMap<>();
     Map<String, Map<LocalDate, Double>> underlyingCache = new HashMap<>();
@@ -52,7 +51,7 @@ public class JpaPriceRepositoryImpl implements PriceRepository {
     }
 
     @Override
-    public List<Double> getPricesFromDataUpUntilDate(String asset, LocalDate from, LocalDate to) {
+    public List<Double> getPricesFromDateUpUntilDate(String asset, LocalDate from, LocalDate to) {
         buildCacheIfNeeded(asset);
         Map<LocalDate, Double> prices = cache.get(asset);
         return prices.keySet()

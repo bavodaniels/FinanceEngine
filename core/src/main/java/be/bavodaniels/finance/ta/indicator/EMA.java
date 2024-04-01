@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EMA {
+public class EMA implements Indicator {
     private final int lookback;
     private final PriceRepository priceRepository;
     private final String asset;
@@ -20,13 +20,19 @@ public class EMA {
     public double calculate(LocalDate date) {
         List<Double> prices = new ArrayList<>();
         int i = 0;
-        while (prices.size() < lookback && i < lookback * 2) {
+        while (prices.size() <= lookback && i < lookback * 2) {
             try {
-                prices.add(priceRepository.getPrice(asset, date.minusDays(i++)));
+                Double price = priceRepository.getPrice(asset, date.minusDays(i++));
+                if (price != null)
+                    prices.add(price);
             }catch(Exception e){}
         }
 
+        if(prices.isEmpty()){
+            return 0.0;
+        }
         //calculate the exponentional moving average of a list of doubles
+        prices = prices.reversed();
 
         double oldValue = prices.get(0);
         double alpha = 2.0 / (lookback + 1.0);
