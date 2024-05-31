@@ -1,7 +1,17 @@
+buildscript {
+    ext.kotlin_version = '1.9.23'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
 plugins {
     id 'org.springframework.boot' version '3.2.1' apply false
     id 'io.spring.dependency-management' version '1.1.0'
 }
+apply plugin: 'kotlin'
 
 allprojects {
     apply plugin: 'java'
@@ -20,7 +30,6 @@ allprojects {
     group = 'be.bavodaniels.finance'
     version = '0.0.1-SNAPSHOT'
 
-    sourceCompatibility = '19'
 
     tasks.named('test') {
         useJUnitPlatform()
@@ -34,4 +43,13 @@ allprojects {
         testImplementation 'org.assertj:assertj-core:3.25.3'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
     }
+}
+repositories {
+    mavenCentral()
+}
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+}
+kotlin {
+    jvmToolchain(19)
 }

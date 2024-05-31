@@ -1,8 +1,9 @@
 package be.bavodaniels.finance.strategy;
 
+import be.bavodaniels.finance.Portfolio;
+
 import java.time.LocalDate;
 
 public interface Strategy {
-    void run(LocalDate date);
-    Statistics getStatistics();
+    void execute(Portfolio portfolio, LocalDate date);
 }
