@@ -5,8 +5,6 @@ import be.bavodaniels.finance.strategy.Statistics;
 import org.apache.commons.math4.legacy.stat.descriptive.rank.Percentile;
 import org.apache.commons.math4.legacy.stat.ranking.NaNStrategy;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,7 +47,7 @@ public class AccountingImpl implements Accounting {
         StatisticalList drawdown = maxCumSum.subtract(cumSum);
         StatisticalList deMeaned = returnPercentage.subtract(mean);
 
-        Percentile p = new Percentile().withEstimationType(Percentile.EstimationType.R_6)
+        Percentile p = new Percentile().withEstimationType(Percentile.EstimationType.R_7)
                 .withNaNStrategy(NaNStrategy.REMOVED);
         p.setData(deMeaned.parallelStream().mapToDouble(value -> value).toArray());
         return new Statistics(mean,
@@ -57,9 +55,9 @@ public class AccountingImpl implements Accounting {
                 drawdown.mean(),
                 drawdown.stream().max(Double::compareTo).orElse(Double.NaN),
                 shiftedReturnPercentage.skewness(),
-                BigDecimal.valueOf(p.evaluate(1)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-                BigDecimal.valueOf(p.evaluate(30)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-                BigDecimal.valueOf(p.evaluate(70)).setScale(8, RoundingMode.HALF_EVEN).doubleValue(),
-                BigDecimal.valueOf(p.evaluate(99)).setScale(8, RoundingMode.HALF_EVEN).doubleValue());
+                p.evaluate(1),
+                p.evaluate(30),
+                p.evaluate(70),
+                p.evaluate(99));
     }
 }
