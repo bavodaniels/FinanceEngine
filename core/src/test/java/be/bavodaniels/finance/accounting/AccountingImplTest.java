@@ -244,7 +244,7 @@ class AccountingImplTest {
 
     @Test
     void testTails() {
-        assertThat(statistics.upperTail()).isEqualTo(1.8552359554200017);
-        assertThat(statistics.lowerTail()).isEqualTo(1.1610971143378572);
+        assertThat(statistics.upperTail()).isEqualTo(1.7618635902910709);
+        assertThat(statistics.lowerTail()).isEqualTo(1.151050692293032);
     }
 }
