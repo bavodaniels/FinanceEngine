@@ -5,6 +5,7 @@ import be.bavodaniels.finance.collection.StatisticalList;
 import be.bavodaniels.finance.repository.PriceRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public class NLookBackStandardDeviation implements StandardDeviation {
     private final int lookback;
@@ -18,7 +19,14 @@ public class NLookBackStandardDeviation implements StandardDeviation {
 
     @Override
     public double calculate(LocalDate date) {
-        StatisticalList prices = new StatisticalList(priceRepository.getPricesFromDateUpUntilDate(asset, date.minusDays(lookback), date));
+        List<Double> priceData = priceRepository.getPricesFromDateUpUntilDate(asset, date.minusDays(lookback), date);
+
+        // Handle null or empty data
+        if (priceData == null || priceData.isEmpty() || priceData.size() < 2) {
+            return Double.NaN;
+        }
+
+        StatisticalList prices = new StatisticalList(priceData);
         return prices.pctChange().standardDeviation() * 16;
     }
 }

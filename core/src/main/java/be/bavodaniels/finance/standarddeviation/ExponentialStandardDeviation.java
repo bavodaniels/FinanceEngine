@@ -19,6 +19,14 @@ public class ExponentialStandardDeviation implements StandardDeviation {
 
     @Override
     public double calculate(LocalDate date) {
-        return (longStdDev.calculate(date) * 0.3) + (shortStdDev.calculate(date) * 0.7);
+        double shortResult = shortStdDev.calculate(date);
+        double longResult = longStdDev.calculate(date);
+
+        // If either result is NaN, return NaN
+        if (Double.isNaN(shortResult) || Double.isNaN(longResult)) {
+            return Double.NaN;
+        }
+
+        return (longResult * 0.3) + (shortResult * 0.7);
     }
 }
