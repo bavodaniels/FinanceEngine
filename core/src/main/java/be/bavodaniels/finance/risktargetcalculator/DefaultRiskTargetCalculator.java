@@ -19,7 +19,26 @@ public class DefaultRiskTargetCalculator implements RiskTargetCalculator{
     }
 
     public int calculateContractsToHold(Double allocatedCapital, Double underlyingPrice, LocalDate date) {
-        double contractsFractional = (allocatedCapital * targetRisk) / (multiplier * underlyingPrice * stdDev.calculate(date));
+        if (allocatedCapital == null || underlyingPrice == null || date == null) {
+            return 0;
+        }
+
+        double stdDevValue = stdDev.calculate(date);
+
+        if (Double.isNaN(stdDevValue) || allocatedCapital == 0) {
+            return 0;
+        }
+
+        if (underlyingPrice == 0 || stdDevValue == 0) {
+            return Integer.MAX_VALUE;
+        }
+
+        double contractsFractional = (allocatedCapital * targetRisk) / (multiplier * underlyingPrice * stdDevValue);
+
+        if (Double.isInfinite(contractsFractional) || Double.isNaN(contractsFractional)) {
+            return contractsFractional > 0 ? Integer.MAX_VALUE : 0;
+        }
+
         return Double.valueOf(contractsFractional).intValue();
     }
 }

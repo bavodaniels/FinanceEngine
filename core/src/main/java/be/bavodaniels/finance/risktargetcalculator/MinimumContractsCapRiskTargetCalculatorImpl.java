@@ -14,6 +14,7 @@ public class MinimumContractsCapRiskTargetCalculatorImpl implements RiskTargetCa
     @Override
     public int calculateContractsToHold(Double allocatedCapital, Double underlyingPrice, LocalDate date) {
         int uncappedContractsToHold = delegate.calculateContractsToHold(allocatedCapital, underlyingPrice, date);
+
         return uncappedContractsToHold >= minimumToHold ? uncappedContractsToHold : 0;
     }
 }
