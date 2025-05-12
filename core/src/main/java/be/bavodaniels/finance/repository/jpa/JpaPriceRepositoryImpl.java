@@ -41,7 +41,7 @@ public class JpaPriceRepositoryImpl implements PriceRepository {
 
     @Override
     public List<Double> getPricesUpUntilDate(String asset, LocalDate date) {
-        buildUnderlyingCacheIfNeeded(asset);
+        buildCacheIfNeeded(asset);
         Map<LocalDate, Double> prices = cache.get(asset);
         return prices.keySet()
                 .parallelStream()
