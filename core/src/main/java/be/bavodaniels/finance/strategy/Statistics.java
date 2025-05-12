@@ -1,7 +1,7 @@
 package be.bavodaniels.finance.strategy;
 
 public record Statistics(double averageDailyReturn,
-                         double annualDailyReturn,
+                         double annualisedReturn,
                          double dailyStandardDeviation,
                          double annualisedStandardDeviation,
                          double dailySharpeRatio,

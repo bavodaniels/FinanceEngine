@@ -216,7 +216,7 @@ class AccountingImplTest {
     @Test
     void testAccountingReturn() {
         assertThat(statistics.averageDailyReturn()).isEqualTo(0.16653429597914524);
-        assertThat(statistics.annualDailyReturn()).isEqualTo(42.63277977066118);
+        assertThat(statistics.annualisedReturn()).isEqualTo(42.63277977066118);
     }
 
     @Test
