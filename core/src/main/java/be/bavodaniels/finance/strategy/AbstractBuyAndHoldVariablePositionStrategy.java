@@ -55,7 +55,7 @@ public abstract class AbstractBuyAndHoldVariablePositionStrategy implements Stra
         } else if (amountOfOpenContracts > 0) { // Downtrend and holding contracts
             transactions.add(new Transaction(date, currentPrice, amountOfOpenContracts, TransactionType.SHORT));
         }
-        accounting.register(date, currentPrice, underlyingPrice, (double) getAmountOfOpenContracts());
+        accounting.register(date, currentPrice, underlyingPrice, (double) amountOfOpenContracts);
     }
 
     private int getAmountOfOpenContracts() {

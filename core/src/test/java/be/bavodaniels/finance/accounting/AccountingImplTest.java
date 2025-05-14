@@ -247,4 +247,9 @@ class AccountingImplTest {
         assertThat(statistics.upperTail()).isEqualTo(1.7618635902910709);
         assertThat(statistics.lowerTail()).isEqualTo(1.151050692293032);
     }
+
+    @Test
+    void testTurnover() {
+        assertThat(statistics.turnover()).isEqualTo(2.775006384612964);
+    }
 }

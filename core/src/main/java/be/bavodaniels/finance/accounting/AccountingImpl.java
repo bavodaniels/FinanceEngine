@@ -5,9 +5,7 @@ import be.bavodaniels.finance.collection.StatisticalList;
 import be.bavodaniels.finance.strategy.Statistics;
 
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Implementation of the Accounting interface that tracks financial data and calculates statistics.
@@ -69,7 +67,8 @@ public class AccountingImpl implements Accounting {
                 percentileCalculator.calculate(1),
                 percentileCalculator.calculate(30),
                 percentileCalculator.calculate(70),
-                percentileCalculator.calculate(99));
+                percentileCalculator.calculate(99),
+                calculateTurnOver());
     }
 
     private static StatisticalList calculateDrawDown(StatisticalList returnPercentage) {
@@ -87,5 +86,44 @@ public class AccountingImpl implements Accounting {
 
         StatisticalList returnPercentage = returnBaseCurrency.divide(allocatedCapital);
         return returnPercentage;
+    }
+
+    public double calculateTurnOver() {
+        // Get the contracts held values as a list, preserving the order from the map
+        List<Double> contractsHeldValues = new ArrayList<>(workbook.get(CONTRACTS_HELD).values());
+
+        List<Double> differences = new ArrayList<>();
+
+        // Calculate differences between consecutive elements
+        for (int i = 1; i < contractsHeldValues.size(); i++) {
+            Double currentValue = contractsHeldValues.get(i);
+            Double previousValue = contractsHeldValues.get(i - 1);
+
+            // Handle potential NaN values by skipping the difference calculation
+            if (!Double.isNaN(currentValue) && !Double.isNaN(previousValue)) {
+                Double difference = currentValue - previousValue;
+                differences.add(difference);
+            }
+        }
+
+        List<Double> percentageOfTrade = new ArrayList<>();
+        for (int i = 1; i < contractsHeldValues.size(); i++) {
+            double contractsHeld = contractsHeldValues.get(i);
+            double difference = differences.get(i - 1);
+
+            if (contractsHeld == 0.0){
+                percentageOfTrade.add(0.0);
+            }else if (!Double.isNaN(contractsHeld) && !Double.isNaN(difference)) {
+                percentageOfTrade.add(Math.abs(difference) / contractsHeld);
+            }
+        }
+
+        double dailyTurnOver = percentageOfTrade.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(Double.NaN);
+
+
+        return dailyTurnOver * 256;
     }
 }

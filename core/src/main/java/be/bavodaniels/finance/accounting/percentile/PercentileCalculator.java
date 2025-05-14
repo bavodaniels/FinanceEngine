@@ -18,7 +18,8 @@ public class PercentileCalculator {
      * Uses R_7 estimation type and removes NaN values.
      */
     public PercentileCalculator() {
-        this(Percentile.EstimationType.R_7, NaNStrategy.REMOVED);
+        this(Percentile.EstimationType.R_7,
+                NaNStrategy.REMOVED);
     }
     
     /**
