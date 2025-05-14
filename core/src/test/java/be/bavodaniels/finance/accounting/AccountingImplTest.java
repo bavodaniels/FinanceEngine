@@ -217,39 +217,58 @@ class AccountingImplTest {
     void testAccountingReturn() {
         assertThat(statistics.averageDailyReturn()).isEqualTo(0.16653429597914524);
         assertThat(statistics.annualisedReturn()).isEqualTo(42.63277977066118);
+
+        assertThat(statistics.toString()).contains("0,1665%");
+        assertThat(statistics.toString()).contains("42,63%");
     }
 
     @Test
     void testAccountingReturnStddev() {
         assertThat(statistics.dailyStandardDeviation()).isEqualTo(1.5812523305355073);
         assertThat(statistics.annualisedStandardDeviation()).isEqualTo(25.300037288568117);
+
+        assertThat(statistics.toString()).contains("1,5813%");
+        assertThat(statistics.toString()).contains("25,30%");
     }
 
     @Test
     void testAccountingSharpeRatio() {
         assertThat(statistics.dailySharpeRatio()).isEqualTo(0.10531797662093986);
         assertThat(statistics.annualisedSharpeRatio()).isEqualTo(1.6850876259350378);
+
+        assertThat(statistics.toString()).contains("0,11");
+        assertThat(statistics.toString()).contains("1,69");
     }
 
     @Test
     void testAccountingSkew() {
         assertThat(statistics.skew()).isEqualTo(0.09108485735373112);
+
+        assertThat(statistics.toString()).contains("0,09");
     }
 
     @Test
     void testAccountingDrawdown() {
         assertThat(statistics.averageDrawdown()).isEqualTo(2.355175523309845);
         assertThat(statistics.maxDrawdown()).isEqualTo(10.538755342025);
+
+        assertThat(statistics.toString()).contains("2,36%");
+        assertThat(statistics.toString()).contains("10,54%");
     }
 
     @Test
     void testTails() {
         assertThat(statistics.upperTail()).isEqualTo(1.7618635902910709);
         assertThat(statistics.lowerTail()).isEqualTo(1.151050692293032);
+
+        assertThat(statistics.toString()).contains("1,76");
+        assertThat(statistics.toString()).contains("1,15");
     }
 
     @Test
     void testTurnover() {
         assertThat(statistics.turnover()).isEqualTo(2.775006384612964);
+
+        assertThat(statistics.toString()).contains("2,78");
     }
 }

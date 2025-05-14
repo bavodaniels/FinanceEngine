@@ -36,4 +36,22 @@ public record Statistics(double averageDailyReturn,
                 (percentile99 / percentile70) / 4.43,
                 turnover);
     }
+
+    @Override
+    public String toString() {
+        return "Statistics{" +
+                "averageDailyReturn=" + String.format("%.4f%%", averageDailyReturn) +
+                ", annualisedReturn=" + String.format("%.2f%%", annualisedReturn) +
+                ", dailyStandardDeviation=" + String.format("%.4f%%", dailyStandardDeviation) +
+                ", annualisedStandardDeviation=" + String.format("%.2f%%", annualisedStandardDeviation) +
+                ", dailySharpeRatio=" + String.format("%.2f", dailySharpeRatio) +
+                ", annualisedSharpeRatio=" + String.format("%.2f", annualisedSharpeRatio) +
+                ", averageDrawdown=" + String.format("%.2f%%", averageDrawdown) +
+                ", maxDrawdown=" + String.format("%.2f%%", maxDrawdown) +
+                ", skew=" + String.format("%.2f", skew) +
+                ", lowerTail=" + String.format("%.2f", lowerTail) +
+                ", upperTail=" + String.format("%.2f", upperTail) +
+                ", turnover=" + String.format("%.2f", turnover) +
+                '}';
+    }
 }
