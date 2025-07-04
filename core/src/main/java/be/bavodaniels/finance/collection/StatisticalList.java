@@ -17,7 +17,7 @@ public class StatisticalList extends ArrayList<Double> {
 
     public StatisticalList pctChange() {
         List<Double> values = this.stream().toList();
-        List<Double> shifted = new LinkedList<>(values);
+        LinkedList<Double> shifted = new LinkedList<>(values);
         shifted.removeFirst();
         List<java.lang.Double> pctChange = new ArrayList<>();
         for (int i = 0; i < shifted.size(); i++) {
@@ -36,7 +36,7 @@ public class StatisticalList extends ArrayList<Double> {
      */
     public StatisticalList difference() {
         List<Double> values = this.stream().toList();
-        List<Double> shifted = new LinkedList<>(values);
+        LinkedList<Double> shifted = new LinkedList<>(values);
         shifted.removeFirst();
         List<Double> difference = new ArrayList<>();
         difference.add(0.0);
