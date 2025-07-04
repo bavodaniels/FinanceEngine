@@ -1,11 +1,16 @@
 package be.bavodaniels.finance.accounting;
 
+import be.bavodaniels.finance.accounting.calculator.DrawdownCalculator;
+import be.bavodaniels.finance.accounting.calculator.ReturnPercentageCalculator;
+import be.bavodaniels.finance.accounting.calculator.TurnoverCalculator;
 import be.bavodaniels.finance.accounting.percentile.PercentileCalculator;
 import be.bavodaniels.finance.collection.StatisticalList;
 import be.bavodaniels.finance.strategy.Statistics;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Implementation of the Accounting interface that tracks financial data and calculates statistics.
@@ -13,15 +18,20 @@ import java.util.*;
 public class AccountingImpl implements Accounting {
     public static final String BACK_ADJUSTED_PRICE = "backAdjustedPrice";
     public static final String CONTRACTS_HELD = "contractsHeld";
-    private static final int CONTRACT_MULTIPLIER = 5;
     private final Map<String, Map<LocalDate, Double>> workbook;
     private final PercentileCalculator percentileCalculator;
+    private final ReturnPercentageCalculator returnPercentageCalculator;
+    private final DrawdownCalculator drawdownCalculator;
+    private final TurnoverCalculator turnoverCalculator;
 
     /**
      * Creates a new AccountingImpl instance with default settings.
      */
     public AccountingImpl() {
-        this(new PercentileCalculator());
+        this(new PercentileCalculator(), 
+             new ReturnPercentageCalculator(), 
+             new DrawdownCalculator(), 
+             new TurnoverCalculator());
     }
 
     /**
@@ -30,10 +40,31 @@ public class AccountingImpl implements Accounting {
      * @param percentileCalculator the percentile calculator to use
      */
     public AccountingImpl(PercentileCalculator percentileCalculator) {
+        this(percentileCalculator, 
+             new ReturnPercentageCalculator(), 
+             new DrawdownCalculator(), 
+             new TurnoverCalculator());
+    }
+
+    /**
+     * Creates a new AccountingImpl instance with the specified calculators.
+     * 
+     * @param percentileCalculator the percentile calculator to use
+     * @param returnPercentageCalculator the return percentage calculator to use
+     * @param drawdownCalculator the drawdown calculator to use
+     * @param turnoverCalculator the turnover calculator to use
+     */
+    public AccountingImpl(PercentileCalculator percentileCalculator,
+                          ReturnPercentageCalculator returnPercentageCalculator,
+                          DrawdownCalculator drawdownCalculator,
+                          TurnoverCalculator turnoverCalculator) {
         this.workbook = new LinkedHashMap<>();
         this.workbook.put(BACK_ADJUSTED_PRICE, new LinkedHashMap<>());
         this.workbook.put(CONTRACTS_HELD, new LinkedHashMap<>());
         this.percentileCalculator = percentileCalculator;
+        this.returnPercentageCalculator = returnPercentageCalculator;
+        this.drawdownCalculator = drawdownCalculator;
+        this.turnoverCalculator = turnoverCalculator;
     }
 
     @Override
@@ -51,9 +82,13 @@ public class AccountingImpl implements Accounting {
             throw new IllegalArgumentException("Allocated capital must be positive");
         }
 
-        StatisticalList returnPercentage = calculateReturnPercentage(allocatedCapital);
+        StatisticalList returnPercentage = returnPercentageCalculator.calculate(
+                allocatedCapital, 
+                workbook.get(BACK_ADJUSTED_PRICE), 
+                workbook.get(CONTRACTS_HELD)
+        );
         StatisticalList shiftedReturnPercentage = returnPercentage.shift();
-        StatisticalList drawdown = calculateDrawDown(returnPercentage);
+        StatisticalList drawdown = drawdownCalculator.calculate(returnPercentage);
         double maxDrawdown = drawdown.stream().max(Double::compareTo).orElse(Double.NaN);
         Double mean = shiftedReturnPercentage.mean();
         StatisticalList deMeaned = returnPercentage.subtract(mean);
@@ -68,62 +103,6 @@ public class AccountingImpl implements Accounting {
                 percentileCalculator.calculate(30),
                 percentileCalculator.calculate(70),
                 percentileCalculator.calculate(99),
-                calculateTurnOver());
-    }
-
-    private static StatisticalList calculateDrawDown(StatisticalList returnPercentage) {
-        StatisticalList cumSum = returnPercentage.cumSum();
-        StatisticalList maxCumSum = cumSum.max();
-
-        StatisticalList drawdown = maxCumSum.subtract(cumSum);
-        return drawdown;
-    }
-
-    private StatisticalList calculateReturnPercentage(double allocatedCapital) {
-        StatisticalList backAdjustedPrices = new StatisticalList(workbook.get(BACK_ADJUSTED_PRICE).values()).ffil();
-        StatisticalList returnPricePoints = backAdjustedPrices.difference().multiply(workbook.get(CONTRACTS_HELD).values().stream().toList());
-        StatisticalList returnBaseCurrency = returnPricePoints.multiply(CONTRACT_MULTIPLIER);
-
-        StatisticalList returnPercentage = returnBaseCurrency.divide(allocatedCapital);
-        return returnPercentage;
-    }
-
-    public double calculateTurnOver() {
-        // Get the contracts held values as a list, preserving the order from the map
-        List<Double> contractsHeldValues = new ArrayList<>(workbook.get(CONTRACTS_HELD).values());
-
-        List<Double> differences = new ArrayList<>();
-
-        // Calculate differences between consecutive elements
-        for (int i = 1; i < contractsHeldValues.size(); i++) {
-            Double currentValue = contractsHeldValues.get(i);
-            Double previousValue = contractsHeldValues.get(i - 1);
-
-            // Handle potential NaN values by skipping the difference calculation
-            if (!Double.isNaN(currentValue) && !Double.isNaN(previousValue)) {
-                Double difference = currentValue - previousValue;
-                differences.add(difference);
-            }
-        }
-
-        List<Double> percentageOfTrade = new ArrayList<>();
-        for (int i = 1; i < contractsHeldValues.size(); i++) {
-            double contractsHeld = contractsHeldValues.get(i);
-            double difference = differences.get(i - 1);
-
-            if (contractsHeld == 0.0){
-                percentageOfTrade.add(0.0);
-            }else if (!Double.isNaN(contractsHeld) && !Double.isNaN(difference)) {
-                percentageOfTrade.add(Math.abs(difference) / contractsHeld);
-            }
-        }
-
-        double dailyTurnOver = percentageOfTrade.stream()
-                .mapToDouble(Double::doubleValue)
-                .average()
-                .orElse(Double.NaN);
-
-
-        return dailyTurnOver * 256;
+                turnoverCalculator.calculate(workbook.get(CONTRACTS_HELD)));
     }
 }
