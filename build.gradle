@@ -20,7 +20,7 @@ allprojects {
     group = 'be.bavodaniels.finance'
     version = '0.0.1-SNAPSHOT'
 
-    sourceCompatibility = '19'
+    sourceCompatibility = '21'
 
     tasks.named('test') {
         useJUnitPlatform()
