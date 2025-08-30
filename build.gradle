@@ -1,5 +1,7 @@
+import org.springframework.boot.gradle.plugin.SpringBootPlugin
+
 plugins {
-    id 'org.springframework.boot' version '3.2.1' apply false
+    id 'org.springframework.boot' version '3.4.0' apply false
     id 'io.spring.dependency-management' version '1.1.0'
 }
 
@@ -13,14 +15,12 @@ allprojects {
 
     dependencyManagement {
         imports {
-            mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+            mavenBom SpringBootPlugin.BOM_COORDINATES
         }
     }
 
     group = 'be.bavodaniels.finance'
     version = '0.0.1-SNAPSHOT'
-
-    sourceCompatibility = '21'
 
     tasks.named('test') {
         useJUnitPlatform()
@@ -28,10 +28,10 @@ allprojects {
 
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter'
-        implementation 'com.opencsv:opencsv:5.7.1'
         implementation 'org.apache.commons:commons-math4-core:4.0-beta1'
 
-        testImplementation 'org.assertj:assertj-core:3.25.3'
+        testImplementation 'org.assertj:assertj-core:3.26.3'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     }
 }
