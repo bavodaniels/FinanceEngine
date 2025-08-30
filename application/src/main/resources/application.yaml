@@ -14,15 +14,3 @@ spring:
     username: postgres
     password: ${DB_POSTGRES_PASSWORD}
 
-
-logging:
-  level:
-    org:
-      hibernate:
-        SQL: debug
-        orm:
-          jdbc:
-            bind: trace
-        stat: debug
-        SQL_SLOW: info
-        cache: debug

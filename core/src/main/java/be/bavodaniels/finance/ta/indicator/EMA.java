@@ -4,7 +4,6 @@ import be.bavodaniels.finance.repository.PriceRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class EMA implements Indicator {
@@ -20,31 +19,25 @@ public class EMA implements Indicator {
 
     public double calculate(LocalDate date) {
         List<Double> prices = new ArrayList<>();
-
-        try {
-            prices = priceRepository.getPricesFromDateUpUntilDate(
-                    asset,
-                    date.minusDays(lookback * 2), // Get enough historical data
-                    date
-            );
-        } catch (Exception e) {
-
+        int i = 0;
+        while (prices.size() <= lookback && i < lookback * 2) {
+            try {
+                Double price = priceRepository.getPrice(asset, date.minusDays(i++));
+                if (price != null)
+                    prices.add(price);
+            }catch(Exception e){}
         }
 
-        if (prices == null || prices.isEmpty()) {
+        if(prices.isEmpty()){
             return 0.0;
         }
-
-        if (prices.size() > 1) {
-            prices = new ArrayList<>(prices);
-            Collections.reverse(prices);
-            prices = prices.subList(0, lookback);
-        }
+        //calculate the exponentional moving average of a list of doubles
+        prices = prices.reversed();
 
         double oldValue = prices.get(0);
         double alpha = 2.0 / (lookback + 1.0);
         for (Double value : prices) {
-            oldValue = oldValue * (1.0 - alpha) + value * alpha;
+            oldValue = oldValue * (1 - alpha) + value * alpha;
         }
         return oldValue;
     }
