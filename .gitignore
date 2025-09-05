@@ -21,18 +21,9 @@ target/
 *.iml
 *.ipr
 
-### Gralde stuff
+### Gradle stuff
 .gradle
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+**/build/**
 
 ### VS Code ###
 .vscode/

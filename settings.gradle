@@ -1,5 +1,6 @@
-rootProject.name = 'FinanceEngine'
+rootProject.name = 'Finance'
 
 include 'application'
 include ':core'
-
+include 'ports'
+include 'adapters'

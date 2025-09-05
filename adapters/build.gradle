@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+}
+
+group = 'be.bavodaniels.finance'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation 'org.mockito:mockito-core'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation project(':ports')
+    implementation project(':core')
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.apache.commons:commons-math4-core:4.0-beta1'
+    implementation 'org.apache.commons:commons-math4-legacy:4.0-beta1'
+}
+
+test {
+    useJUnitPlatform()
+}
